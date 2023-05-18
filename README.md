@@ -1,3 +1,15 @@
+
+# SETUP 
+
+export PROJECT=hc-600a23aba84c46faaf6440b4dc2
+gcloud config set project $PROJECT
+gcloud config set compute/zone us-west1-c
+
+gcloud container clusters create dyu-consulk8s --num-nodes=3 --machine-type "e2-highcpu-4" --enable-autoscaling --min-nodes 1 --max-nodes 4
+gcloud container clusters get-credentials dyu-consulk8s
+export CLUSTER1_CONTEXT=$(kubectl config current-context)
+
+
 # NGINX Ingress Controller for Consul on Kubernetes Example
 
 This example configuration deploys and configures a NGINX Ingress ([`ingress-nginx`](https://developer.hashicorp.com/consul/docs/k8s/connect/ingress-controllers)) Controller on a Consul-K8s configuration using transparent proxy. It is heavily inspired by [@dhiaayachi](https://github.com/dhiaayachi/eks-consul-ingressnginx).
@@ -7,8 +19,9 @@ This example configuration deploys and configures a NGINX Ingress ([`ingress-ngi
 - Kubernetes cluster on any [cloud provider](cloud-provider-setup)
 - `kubectl` installed locally
 - `helm` installed locally
+- `jq` installed locally
 
-Once you have the requirements, follow the instructions in the [Runbook](#runbook) section to configure an NGINX ingress controller with Consul on Kubernetes
+Once you have the requirements, follow the instructions in the [Runbook](#runbook) section to configure an NGINX Inc ingress controller with Consul on Kubernetes
 
 ### Cloud Provider Setup
 
@@ -72,7 +85,7 @@ Consul on K8s can be deployed on any K8s distro such as EKS, GKE, and AKS. The f
 
     ```bash
     helm repo add hashicorp https://helm.releases.hashicorp.com
-    helm install consul hashicorp/consul --values consul-values.yaml --version "1.0.2" --create-namespace --namespace consul
+    helm install consul hashicorp/consul --values consul-values.yaml --version "1.0.7" --create-namespace --namespace consul
     ```
 
 2. Add deny all intention.
@@ -81,17 +94,10 @@ Consul on K8s can be deployed on any K8s distro such as EKS, GKE, and AKS. The f
     kubectl apply -f deny-all.yaml
     ```
 
-3. Deploy NGINX Ingress Controller ([ingress-nginx](https://github.com/kubernetes/ingress-nginx)).
+3. Deploy NGINX Inc Ingress Controller ([ingress-nginx](https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-helm/)).
 
     ```bash
-    helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-    ```
-
-    ```bash
-    helm upgrade --install ingress-nginx ingress-nginx \
-      --repo https://kubernetes.github.io/ingress-nginx \
-      --namespace ingress-nginx --create-namespace --values nginx-ingress-values.yaml
-
+    helm upgrade --install nginx-ingress oci://ghcr.io/nginxinc/charts/nginx-ingress --version 0.17.1 --namespace nginx-ingress --create-namespace --values nginx-ingress-values.yaml
     ```
 
 4. Configure ServiceDefaults to enable [DialedDirectly](https://developer.hashicorp.com/consul/docs/connect/config-entries/service-defaults#dialeddirectly) for transparent proxy.
@@ -103,7 +109,7 @@ Consul on K8s can be deployed on any K8s distro such as EKS, GKE, and AKS. The f
 5. Set NGINX load balancer IP as an environment variable.
 
     ```bash
-    export NGINX_INGRESS_IP=$(kubectl get service ingress-nginx-controller -n ingress-nginx -o json | jq -r '.status.loadBalancer.ingress[].ip')
+    export NGINX_INGRESS_IP=$(kubectl get service nginx-ingress-controller -n nginx-ingress -o json | jq -r '.status.loadBalancer.ingress[].ip')
     ```
 
 6. Generate Ingress resource configuration with NGINX load balancer IP.
@@ -115,18 +121,17 @@ Consul on K8s can be deployed on any K8s distro such as EKS, GKE, and AKS. The f
     metadata:
       name: test-nginx-ingress
       annotations:
-        nginx.ingress.kubernetes.io/proxy-body-size: 10G
-        nginx.ingress.kubernetes.io/enable-underscores-in-headers: "true"
-        nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-        nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-        nginx.ingress.kubernetes.io/proxy-connect-timeout: "1200"
-        # nginx.ingress.kubernetes.io/client-header-timeout: "300"
-        nginx.ingress.kubernetes.io/upstream-keepalive-timeout: "300"
-        nginx.ingress.kubernetes.io/proxy-buffer-size: 8k
+		nginx.org/client-max-body-size: "4m"
+		nginx.org/underscores-in-headers: "on"
+		nginx.org/proxy-read-timeout: "300"
+		nginx.org/proxy-send-timeout: "300"
+		nginx.org/proxy-connect-timeout: "300"
+		nginx.org/keepalive: "300"
+		nginx.org/proxy-buffer-size: 8k
     spec:
       ingressClassName: nginx
       rules:
-      - host: "$NGINX_INGRESS_IP.nip.io"
+      - host: "35.247.18.98.nip.io"
         http:
           paths:
           - path: /server
