@@ -1,7 +1,7 @@
 
 # NGINX Ingress Controller for Consul on Kubernetes Example
 
-This example configuration deploys and configures a [NGINX Ingress Controller](https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-helm/) as described by the Consul Service Mesh docs on integrating [Ingress Controllers]](https://developer.hashicorp.com/consul/docs/k8s/connect/ingress-controllers)) with Consul K8s using transparent proxy. It is heavily inspired by [@dhiaayachi](https://github.com/dhiaayachi/eks-consul-ingressnginx).
+This example configuration deploys and configures a [NGINX Ingress Controller](https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-helm/) as described by the Consul Service Mesh docs on integrating [Ingress Controllers](https://developer.hashicorp.com/consul/docs/k8s/connect/ingress-controllers) with Consul K8s using transparent proxy. It is heavily inspired by [@dhiaayachi](https://github.com/dhiaayachi/eks-consul-ingressnginx).
 
 ## Requirements
 
