@@ -110,13 +110,13 @@ Consul on K8s can be deployed on any K8s distro such as EKS, GKE, and AKS. The f
     metadata:
       name: test-nginx-ingress
       annotations:
-		nginx.org/client-max-body-size: "4m"
-		nginx.org/underscores-in-headers: "on"
-		nginx.org/proxy-read-timeout: "300"
-		nginx.org/proxy-send-timeout: "300"
-		nginx.org/proxy-connect-timeout: "300"
-		nginx.org/keepalive: "300"
-		nginx.org/proxy-buffer-size: 8k
+        nginx.org/client-max-body-size: "4m"
+        nginx.org/underscores-in-headers: "on"
+        nginx.org/proxy-read-timeout: "300"
+        nginx.org/proxy-send-timeout: "300"
+        nginx.org/proxy-connect-timeout: "300"
+        nginx.org/keepalive: "300"
+        nginx.org/proxy-buffer-size: 8k
     spec:
       ingressClassName: nginx
       rules:
