@@ -1,15 +1,4 @@
 
-# SETUP 
-
-export PROJECT=hc-600a23aba84c46faaf6440b4dc2
-gcloud config set project $PROJECT
-gcloud config set compute/zone us-west1-c
-
-gcloud container clusters create dyu-consulk8s --num-nodes=3 --machine-type "e2-highcpu-4" --enable-autoscaling --min-nodes 1 --max-nodes 4
-gcloud container clusters get-credentials dyu-consulk8s
-export CLUSTER1_CONTEXT=$(kubectl config current-context)
-
-
 # NGINX Ingress Controller for Consul on Kubernetes Example
 
 This example configuration deploys and configures a NGINX Ingress ([`ingress-nginx`](https://developer.hashicorp.com/consul/docs/k8s/connect/ingress-controllers)) Controller on a Consul-K8s configuration using transparent proxy. It is heavily inspired by [@dhiaayachi](https://github.com/dhiaayachi/eks-consul-ingressnginx).
@@ -131,7 +120,7 @@ Consul on K8s can be deployed on any K8s distro such as EKS, GKE, and AKS. The f
     spec:
       ingressClassName: nginx
       rules:
-      - host: "35.247.18.98.nip.io"
+      - host: "$NGINX_INGRESS_IP.nip.io"
         http:
           paths:
           - path: /server
